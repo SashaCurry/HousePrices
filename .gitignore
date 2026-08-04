@@ -1,0 +1,5 @@
+.idea/
+content/*
+__pycache__
+catboost_info/
+0_Test-hypotheses.ipynb
