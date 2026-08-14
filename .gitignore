@@ -3,4 +3,5 @@
 content/*
 __pycache__
 catboost_info/
-0_Test-hypotheses.ipynb
+0_Test-hyp*
+253_29346_308-pycharm-support-libs
