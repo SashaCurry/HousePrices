@@ -1,9 +1,8 @@
-import numpy as np
-
-from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import KFold
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import SGDRegressor
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -12,33 +11,50 @@ from config import config
 from data_handle import *
 
 
-def train_model_sklearn(X, y, model_name='logistic_regression'):
-    X = preprocessing(X, handle_categorical='One-hot-encoding')
+def train_model_sklearn(train_data, model_name='linear_regression'):
+    train_data_handled = preprocessing(train_data)
+
+    X = train_data_handled.drop(columns=['SalePrice'])
+    y = train_data_handled['SalePrice']
+
+    scaler = ColumnTransformer(
+        transformers=[
+            ('cat', MinMaxScaler(), ['MSSubClass_Rating', 'LotConfig_Rating', 'Neighborhood_Rating',
+                                     'Condition1_Rating', 'OverallQual', 'Exterior1st_Rating', 'ExterQual_Rating',
+                                     'BsmtQual_Rating', 'BsmtExposure_Rating', 'BsmtFinType_Target', 'BsmtFinSF_Ratio',
+                                     'TotalBaths_Target', 'KitchenQual_Rating', 'TotRmsAbvGrd_Rating',
+                                     'Fireplaces_Rating', 'FireplaceQu_Target', 'GarageType_Target',
+                                     'GarageCars_Rating', 'SaleCondition_Target']),
+            ('num', StandardScaler(), ['LotFrontage', 'LotArea', 'TotalBsmtSF', 'GrLivArea', 'GarageAge',
+                                       'GarageArea', 'WoodDeckSF', 'HouseAge', 'RemodAge'])
+        ],
+        remainder='passthrough'
+    )
 
     model = None
-    if model_name == 'logistic_regression':
+    if model_name == 'linear_regression':
         model = Pipeline([
-            ('scale', StandardScaler()),
-            ('model', LogisticRegression(**config.logreg.params))
+            ('scale', scaler),
+            ('model', SGDRegressor(**config.linreg.params))
         ])
-    elif model_name == 'logistic_regression_l1':
+    elif model_name == 'linear_regression_l1':
         model = Pipeline([
-            ('scale', StandardScaler()),
-            ('model', LogisticRegression(**config.logreg_l1.params))
+            ('scale', scaler),
+            ('model', SGDRegressor(**config.linreg_l1.params))
         ])
-    elif model_name == 'logistic_regression_l2':
+    elif model_name == 'linear_regression_l2':
         model = Pipeline([
-            ('scale', StandardScaler()),
-            ('model', LogisticRegression(**config.logreg_l2.params))
+            ('scale', scaler),
+            ('model', SGDRegressor(**config.linreg_l2.params))
         ])
-    elif model_name == 'logistic_regression_elasticnet':
+    elif model_name == 'linear_regression_elasticnet':
         model = Pipeline([
-            ('scale', StandardScaler()),
-            ('model', LogisticRegression(**config.logreg_elnet.params))
+            ('scale', scaler),
+            ('model', SGDRegressor(**config.linreg_elnet.params))
         ])
     elif model_name == 'knn':
         model = Pipeline([
-            ('scale', StandardScaler()),
+            ('scale', scaler),
             ('model', KNeighborsClassifier(**config.knn.params))
         ])
     elif model_name == 'decision_tree':
@@ -47,10 +63,10 @@ def train_model_sklearn(X, y, model_name='logistic_regression'):
         model = RandomForestClassifier(**config.random_forest.params,
                                        random_state=config.general.seed)
 
-    skf = StratifiedKFold(n_splits=config.training.n_splits, shuffle=True, random_state=config.general.seed)
+    kf = KFold(n_splits=config.training.n_splits, shuffle=True)
     scores = []
 
-    for train_index, val_index in skf.split(X, y):
+    for train_index, val_index in kf.split(X):
         X_train, X_val = X.iloc[train_index], X.iloc[val_index]
         y_train, y_val = y.iloc[train_index], y.iloc[val_index]
 
@@ -66,12 +82,13 @@ def train_model_sklearn(X, y, model_name='logistic_regression'):
     return model, model_acc, model_std
 
 
-def test_model_sklearn(X, model, model_name):
-    X_test = preprocessing(X, handle_categorical='One-hot-encoding')
+def test_model_sklearn(data, model, model_name):
+    test_data_handled = preprocessing(data)
+    X_test = test_data_handled.drop(columns=['SalePrice'])
 
     preds = model.predict(X_test)
 
-    df = pd.DataFrame({'PassengerId': X['PassengerId'],
-                       'Survived': preds})
+    df = pd.DataFrame({'PassengerId': X['Id'],
+                       'SalePrice': preds})
     df.to_csv(path_or_buf=f'{config.paths.path_save_csv}{model_name}_preds.csv',
               index=False)

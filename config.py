@@ -1,5 +1,4 @@
 from omegaconf import OmegaConf
-import numpy as np
 
 config = {
     'general': {
@@ -17,10 +16,10 @@ config = {
         'n_splits': 5
     },
     'lb_scores': {
-        'logreg': 0,
-        'logreg_l1': 0,
-        'logreg_l2': 0,
-        'logreg_en': 0,
+        'linreg': 0,
+        'linreg_l1': 0,
+        'linreg_l2': 0,
+        'linreg_en': 0,
         'knn': 0,
         'dt': 0,
         'rf': 0,
@@ -35,17 +34,18 @@ config = {
     'linreg': {
         'train_mode': True,
         'params': {
+            'loss': 'squared_error',
             'max_iter': 1000,
-            'C': np.inf
+            'penalty': None,
         }
     },
     'linreg_l1': {
         'train_mode': True,
         'params': {
+            'loss': 'squared_error',
             'max_iter': 1000,
-            'l1_ratio': 1.0,
-            'solver': 'liblinear',
-            'C': 1
+            'penalty': 'l1',
+            'alpha': 0.0001,
         }
     },
     'linreg_l2': {

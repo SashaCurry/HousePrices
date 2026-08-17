@@ -15,17 +15,14 @@ def run(config):
     train_data = pd.read_csv(config.paths.path_to_train)
     test_data = pd.read_csv(config.paths.path_to_test)
 
-    X = train_data.drop(columns=['SalePrice'])
-    y = train_data['SalePrice']
-
     # Суммарная информация о всех моделях и их метриках
     model_data = []
 
     # ↓↓↓ Логистическая регрессия ↓↓↓
 
     linreg_model, linreg_acc, linreg_std = None, '—', '—'
-    if config.logreg.train_mode:
-        linreg_model, linreg_acc, linreg_std = train_model_sklearn(X, y, model_name='linear_regression')
+    if config.linreg.train_mode:
+        linreg_model, linreg_acc, linreg_std = train_model_sklearn(train_data, model_name='linear_regression')
         joblib.dump(linreg_model, config.paths.path_save_models + 'linreg_model.joblib')
     else:
         try:
@@ -35,24 +32,24 @@ def run(config):
                   f'Проверьте наличие файла "linreg_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['LinReg', linreg_acc, linreg_std, config.lb_scores.linreg])
-    # test_model_sklearn(X=test_data, model=linreg_model, model_name='linreg')
-    '''
+    # test_model_sklearn(data=test_data, model=linreg_model, model_name='linreg')
+
     # ↓↓↓ Логистическая регрессия с L1-регуляризацией ↓↓↓
 
-    logreg_l1_model, logreg_l1_acc, logreg_l1_std = None, '—', '—'
-    if config.logreg_l1.train_mode:
-        logreg_l1_model, logreg_l1_acc, logreg_l1_std = train_model_sklearn(X, y, model_name='logistic_regression_l1')
-        joblib.dump(logreg_l1_model, config.paths.path_save_models + 'logreg_l1_model.joblib')
+    linreg_l1_model, linreg_l1_acc, linreg_l1_std = None, '—', '—'
+    if config.linreg_l1.train_mode:
+        linreg_l1_model, linreg_l1_acc, linreg_l1_std = train_model_sklearn(train_data, model_name='linear_regression_l1')
+        joblib.dump(linreg_l1_model, config.paths.path_save_models + 'linreg_l1_model.joblib')
     else:
         try:
-            logreg_l1_model = joblib.load(config.paths.path_save_models + 'logreg_l1_model.joblib')
+            linreg_l1_model = joblib.load(config.paths.path_save_models + 'linreg_l1_model.joblib')
         except FileNotFoundError:
-            print(f'Модель logreg_l1 не загружена. '
-                  f'Проверьте наличие файла "logreg_l1_model.joblib" в {config.paths.path_save_models}')
+            print(f'Модель linreg_l1 не загружена. '
+                  f'Проверьте наличие файла "linreg_l1_model.joblib" в {config.paths.path_save_models}')
 
-    model_data.append(['LogReg-L1', logreg_l1_acc, logreg_l1_std, config.lb_scores.logreg_l1])
-    test_model_sklearn(X=test_data, model=logreg_l1_model, model_name='logreg_l1')
-
+    model_data.append(['LinReg-L1', linreg_l1_acc, linreg_l1_std, config.lb_scores.linreg_l1])
+    # test_model_sklearn(data=test_data, model=linreg_l1_model, model_name='linreg_l1')
+    '''
     # ↓↓↓ Логистическая регрессия с L2-регуляризацией ↓↓↓
 
     logreg_l2_model, logreg_l2_acc, logreg_l2_std = None, '—', '—'
