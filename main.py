@@ -18,7 +18,7 @@ def run(config):
     # Суммарная информация о всех моделях и их метриках
     model_data = []
 
-    # ↓↓↓ Логистическая регрессия ↓↓↓
+    # ↓↓↓ Линейная регрессия ↓↓↓
 
     linreg_model, linreg_acc, linreg_std = None, '—', '—'
     if config.linreg.train_mode:
@@ -34,7 +34,7 @@ def run(config):
     model_data.append(['LinReg', linreg_acc, linreg_std, config.lb_scores.linreg])
     # test_model_sklearn(data=test_data, model=linreg_model, model_name='linreg')
 
-    # ↓↓↓ Логистическая регрессия с L1-регуляризацией ↓↓↓
+    # ↓↓↓ Линейная регрессия с L1-регуляризацией ↓↓↓
 
     linreg_l1_model, linreg_l1_acc, linreg_l1_std = None, '—', '—'
     if config.linreg_l1.train_mode:
@@ -49,45 +49,45 @@ def run(config):
 
     model_data.append(['LinReg-L1', linreg_l1_acc, linreg_l1_std, config.lb_scores.linreg_l1])
     # test_model_sklearn(data=test_data, model=linreg_l1_model, model_name='linreg_l1')
-    '''
-    # ↓↓↓ Логистическая регрессия с L2-регуляризацией ↓↓↓
 
-    logreg_l2_model, logreg_l2_acc, logreg_l2_std = None, '—', '—'
-    if config.logreg_l2.train_mode:
-        logreg_l2_model, logreg_l2_acc, logreg_l2_std = train_model_sklearn(X, y, model_name='logistic_regression_l2')
-        joblib.dump(logreg_l2_model, config.paths.path_save_models + 'logreg_l2_model.joblib')
+    # ↓↓↓ Линейная регрессия с L2-регуляризацией ↓↓↓
+
+    linreg_l2_model, linreg_l2_acc, linreg_l2_std = None, '—', '—'
+    if config.linreg_l2.train_mode:
+        linreg_l2_model, linreg_l2_acc, linreg_l2_std = train_model_sklearn(train_data, model_name='linear_regression_l2')
+        joblib.dump(linreg_l2_model, config.paths.path_save_models + 'linreg_l2_model.joblib')
     else:
         try:
-            logreg_l2_model = joblib.load(config.paths.path_save_models + 'logreg_l2_model.joblib')
+            linreg_l2_model = joblib.load(config.paths.path_save_models + 'linreg_l2_model.joblib')
         except FileNotFoundError:
-            print(f'Модель logreg_l2 не загружена. '
-                  f'Проверьте наличие файла "logreg_l2_model.joblib" в {config.paths.path_save_models}')
+            print(f'Модель linreg_l2 не загружена. '
+                  f'Проверьте наличие файла "linreg_l2_model.joblib" в {config.paths.path_save_models}')
 
-    model_data.append(['LogReg-L2', logreg_l2_acc, logreg_l2_std, config.lb_scores.logreg_l2])
-    test_model_sklearn(X=test_data, model=logreg_l2_model, model_name='logreg_l2')
+    model_data.append(['LinReg-L2', linreg_l2_acc, linreg_l2_std, config.lb_scores.linreg_l2])
+    # test_model_sklearn(data=test_data, model=linreg_l2_model, model_name='linreg_l2')
 
-    # ↓↓↓ Логистическая регрессия с ElasticNet-регуляризацией ↓↓↓
+    # ↓↓↓ Линейная регрессия с ElasticNet-регуляризацией ↓↓↓
 
-    logreg_en_model, logreg_en_acc, logreg_en_std = None, '—', '—'
-    if config.logreg_elnet.train_mode:
-        logreg_en_model, logreg_en_acc, logreg_en_std = train_model_sklearn(X, y,
-                                                                            model_name='logistic_regression_elasticnet')
-        joblib.dump(logreg_en_model, config.paths.path_save_models + 'logreg_en_model.joblib')
+    linreg_en_model, linreg_en_acc, linreg_en_std = None, '—', '—'
+    if config.linreg_elnet.train_mode:
+        linreg_en_model, linreg_en_acc, linreg_en_std = train_model_sklearn(train_data,
+                                                                            model_name='linear_regression_elasticnet')
+        joblib.dump(linreg_en_model, config.paths.path_save_models + 'linreg_en_model.joblib')
     else:
         try:
-            logreg_en_model = joblib.load(config.paths.path_save_models + 'logreg_en_model.joblib')
+            linreg_en_model = joblib.load(config.paths.path_save_models + 'linreg_en_model.joblib')
         except FileNotFoundError:
-            print(f'Модель logreg_en не загружена. '
-                  f'Проверьте наличие файла "logreg_en_model.joblib" в {config.paths.path_save_models}')
+            print(f'Модель linreg_en не загружена. '
+                  f'Проверьте наличие файла "linreg_en_model.joblib" в {config.paths.path_save_models}')
 
-    model_data.append(['LogReg-ElNet', logreg_en_acc, logreg_en_std, config.lb_scores.logreg_en])
-    test_model_sklearn(X=test_data, model=logreg_en_model, model_name='logreg_en')
+    model_data.append(['LinReg-ElNet', linreg_en_acc, linreg_en_std, config.lb_scores.linreg_en])
+    # test_model_sklearn(data=test_data, model=linreg_en_model, model_name='linreg_en')
 
     # ↓↓↓ Метод ближайших соседей KNN ↓↓↓
 
     knn_model, knn_acc, knn_std = None, '—', '—'
     if config.knn.train_mode:
-        knn_model, knn_acc, knn_std = train_model_sklearn(X, y, model_name='knn')
+        knn_model, knn_acc, knn_std = train_model_sklearn(train_data, model_name='knn')
         joblib.dump(knn_model, config.paths.path_save_models + 'knn_model.joblib')
     else:
         try:
@@ -97,13 +97,13 @@ def run(config):
                   f'Проверьте наличие файла "knn_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['KNN', knn_acc, knn_std, config.lb_scores.knn])
-    test_model_sklearn(X=test_data, model=knn_model, model_name='knn')
+    # test_model_sklearn(data=test_data, model=knn_model, model_name='knn')
 
     # ↓↓↓ Решающее дерево DecisionTree ↓↓↓
 
     dt_model, dt_acc, dt_std = None, '—', '—'
     if config.decision_tree.train_mode:
-        dt_model, dt_acc, dt_std = train_model_sklearn(X, y, model_name='decision_tree')
+        dt_model, dt_acc, dt_std = train_model_sklearn(train_data, model_name='decision_tree')
         joblib.dump(dt_model, config.paths.path_save_models + 'dt_model.joblib')
     else:
         try:
@@ -113,13 +113,13 @@ def run(config):
                   f'Проверьте наличие файла "dt_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['DecisionTree', dt_acc, dt_std, config.lb_scores.dt])
-    test_model_sklearn(X=test_data, model=dt_model, model_name='decision_tree')
+    # test_model_sklearn(data=test_data, model=dt_model, model_name='decision_tree')
 
     # ↓↓↓ Случайный лес RandomForest ↓↓↓
 
     rf_model, rf_acc, rf_std = None, '—', '—'
     if config.random_forest.train_mode:
-        rf_model, rf_acc, rf_std = train_model_sklearn(X, y, model_name='random_forest')
+        rf_model, rf_acc, rf_std = train_model_sklearn(train_data, model_name='random_forest')
         joblib.dump(rf_model, config.paths.path_save_models + 'rf_model.joblib')
     else:
         try:
@@ -129,8 +129,8 @@ def run(config):
                   f'Проверьте наличие файла "rf_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['RandomForest', rf_acc, rf_std, config.lb_scores.rf])
-    test_model_sklearn(X=test_data, model=rf_model, model_name='random_forest')
-
+    # test_model_sklearn(data=test_data, model=rf_model, model_name='random_forest')
+    '''
     # ↓↓↓ Бустинг CatBoost ↓↓↓
 
     catboost_model, catboost_acc, catboost_std = None, '—', '—'

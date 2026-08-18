@@ -1,30 +1,34 @@
 from sklearn.model_selection import KFold
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, TargetEncoder, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDRegressor
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from config import config
 from data_handle import *
 
 
 def train_model_sklearn(train_data, model_name='linear_regression'):
-    train_data_handled = preprocessing(train_data)
+    train_data_handled = handling(train_data)
 
     X = train_data_handled.drop(columns=['SalePrice'])
     y = train_data_handled['SalePrice']
 
-    scaler = ColumnTransformer(
+    target_pipeline = Pipeline([
+        ('encoder', TargetEncoder(target_type='continuous')),
+        ('scaler', StandardScaler())
+    ])
+
+    preprocessor = ColumnTransformer(
         transformers=[
+            ('target', target_pipeline, ['BsmtFinType1', 'TotalBaths', 'FireplaceQu', 'GarageType', 'SaleCondition']),
             ('cat', MinMaxScaler(), ['MSSubClass_Rating', 'LotConfig_Rating', 'Neighborhood_Rating',
                                      'Condition1_Rating', 'OverallQual', 'Exterior1st_Rating', 'ExterQual_Rating',
-                                     'BsmtQual_Rating', 'BsmtExposure_Rating', 'BsmtFinType_Target', 'BsmtFinSF_Ratio',
-                                     'TotalBaths_Target', 'KitchenQual_Rating', 'TotRmsAbvGrd_Rating',
-                                     'Fireplaces_Rating', 'FireplaceQu_Target', 'GarageType_Target',
-                                     'GarageCars_Rating', 'SaleCondition_Target']),
+                                     'BsmtQual_Rating', 'BsmtExposure_Rating', 'BsmtFinSF_Ratio', 'KitchenQual_Rating',
+                                     'TotRmsAbvGrd_Rating', 'Fireplaces_Rating', 'GarageCars_Rating']),
             ('num', StandardScaler(), ['LotFrontage', 'LotArea', 'TotalBsmtSF', 'GrLivArea', 'GarageAge',
                                        'GarageArea', 'WoodDeckSF', 'HouseAge', 'RemodAge'])
         ],
@@ -34,34 +38,39 @@ def train_model_sklearn(train_data, model_name='linear_regression'):
     model = None
     if model_name == 'linear_regression':
         model = Pipeline([
-            ('scale', scaler),
+            ('scale', preprocessor),
             ('model', SGDRegressor(**config.linreg.params))
         ])
     elif model_name == 'linear_regression_l1':
         model = Pipeline([
-            ('scale', scaler),
+            ('scale', preprocessor),
             ('model', SGDRegressor(**config.linreg_l1.params))
         ])
     elif model_name == 'linear_regression_l2':
         model = Pipeline([
-            ('scale', scaler),
+            ('scale', preprocessor),
             ('model', SGDRegressor(**config.linreg_l2.params))
         ])
     elif model_name == 'linear_regression_elasticnet':
         model = Pipeline([
-            ('scale', scaler),
+            ('scale', preprocessor),
             ('model', SGDRegressor(**config.linreg_elnet.params))
         ])
     elif model_name == 'knn':
         model = Pipeline([
-            ('scale', scaler),
-            ('model', KNeighborsClassifier(**config.knn.params))
+            ('scale', preprocessor),
+            ('model', KNeighborsRegressor(**config.knn.params))
         ])
     elif model_name == 'decision_tree':
-        model = DecisionTreeClassifier(**config.decision_tree.params)
+        model = Pipeline([
+            ('scale', preprocessor),
+            ('model', DecisionTreeRegressor(**config.decision_tree.params))
+        ])
     elif model_name == 'random_forest':
-        model = RandomForestClassifier(**config.random_forest.params,
-                                       random_state=config.general.seed)
+        model = Pipeline([
+            ('scale', preprocessor),
+            ('model', RandomForestRegressor(**config.random_forest.params))
+        ])
 
     kf = KFold(n_splits=config.training.n_splits, shuffle=True)
     scores = []
@@ -83,7 +92,7 @@ def train_model_sklearn(train_data, model_name='linear_regression'):
 
 
 def test_model_sklearn(data, model, model_name):
-    test_data_handled = preprocessing(data)
+    test_data_handled = handling(data)
     X_test = test_data_handled.drop(columns=['SalePrice'])
 
     preds = model.predict(X_test)

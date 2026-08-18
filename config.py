@@ -51,42 +51,42 @@ config = {
     'linreg_l2': {
         'train_mode': True,
         'params': {
+            'loss': 'squared_error',
             'max_iter': 1000,
-            'l1_ratio': 0.0,
-            'solver': 'lbfgs',
-            'C': 0.01
+            'alpha': 0.0001
         }
     },
     'linreg_elnet': {
         'train_mode': True,
         'params': {
+            'loss': 'squared_error',
             'max_iter': 1000,
             'l1_ratio': 0.5,
-            'solver': 'saga',
-            'C': 1
+            'alpha': 0.0001
         }
     },
     'knn': {
         'train_mode': True,
         'params': {
-            'n_neighbors': 6,
-            'weights': 'uniform',
-            'metric': 'chebyshev'
+            'n_neighbors': 5,
+            'weights': 'distance',
+            'metric': 'euclidean'
         }
     },
     'decision_tree': {
         'train_mode': True,
         'params': {
             'max_depth': 4,
-            'criterion': 'gini',
-            'splitter': 'best'
+            'criterion': 'squared_error',
+            'splitter': 'best',
+            'min_samples_split': 5,
         }
     },
     'random_forest': {
         'train_mode': True,
         'params': {
             'n_estimators': 50,
-            'min_samples_leaf': 2
+            'max_depth': 10,
         }
     },
     'catboost': {

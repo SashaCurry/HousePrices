@@ -42,7 +42,6 @@ def __handle_features(df: pd.DataFrame) -> pd.DataFrame:
     mssubclass_sorted = df.groupby('MSSubClass', as_index=False)['SalePrice'].mean().sort_values('SalePrice')
     for idx, mssubclass in enumerate(mssubclass_sorted['MSSubClass']):
         df.loc[df['MSSubClass'] == mssubclass, 'MSSubClass_Rating'] = idx + 1
-    # df = pd.get_dummies(data=df, columns=['MSSubClass'], drop_first=True)
 
     df['LotConfig_Rating'] = 0.0
     df.loc[df['LotConfig'] == 'Inside', 'LotConfig_Rating'] = 1
@@ -99,12 +98,6 @@ def __handle_features(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[df['BsmtExposure'] == 'Av', 'BsmtExposure_Rating'] = 6
     df.loc[df['BsmtExposure'] == 'Gd', 'BsmtExposure_Rating'] = 8.5
 
-    df['BsmtFinType_Target'] = 0
-    lotshape_target = df.groupby('BsmtFinType1')['SalePrice'].mean()
-    for bsmtfintype1, target_mean in lotshape_target.items():
-        df.loc[df['BsmtFinType1'] == bsmtfintype1, 'BsmtFinType_Target'] = round(target_mean)
-    # df = pd.get_dummies(data=df, columns=['BsmtFinType1'], drop_first=True)
-
     df['BsmtFinSF_Ratio'] = np.where(df['TotalBsmtSF'] > 0,
                                      (df['BsmtFinSF1'] + df['BsmtFinSF2']) / df['TotalBsmtSF'],
                                      0)
@@ -112,12 +105,7 @@ def __handle_features(df: pd.DataFrame) -> pd.DataFrame:
 
     df['CentralAir'] = (df['CentralAir'] == 'Y').astype(int)
 
-    df['TotalBaths_Target'] = 0
     df['TotalBaths'] = df['BsmtFullBath'] + 0.5 * df['BsmtHalfBath'] + df['FullBath'] + 0.5 * df['HalfBath']
-    totalbaths_target = df.groupby('TotalBaths')['SalePrice'].mean()
-    for totalbaths, target_mean in totalbaths_target.items():
-        df.loc[df['TotalBaths'] == totalbaths, 'TotalBaths_Target'] = round(target_mean)
-    # df = pd.get_dummies(data=df, columns=['TotalBaths'], drop_first=True)
 
     df['KitchenQual_Rating'] = 0.0
     df.loc[df['KitchenQual'].isin(['Po', 'Fa']), 'KitchenQual_Rating'] = 1
@@ -146,19 +134,6 @@ def __handle_features(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[df['Fireplaces'] == 1, 'Fireplaces_Rating'] = 9.5
     df.loc[df['Fireplaces'] == 2, 'Fireplaces_Rating'] = 13.5
 
-    df['FireplaceQu_Target'] = 0
-    df.loc[df['FireplaceQu'].isin(['Po', 'Fa']), 'FireplaceQu'] = 'LowQu'
-    fireplacequ_target = df.groupby('FireplaceQu')['SalePrice'].mean()
-    for fireplacequ, target_mean in fireplacequ_target.items():
-        df.loc[df['FireplaceQu'] == fireplacequ, 'FireplaceQu_Target'] = round(target_mean)
-    # df = pd.get_dummies(data=df, columns=['FireplaceQu'], drop_first=True)
-
-    df['GarageType_Target'] = 0
-    garagetype_target = df.groupby('GarageType')['SalePrice'].mean()
-    for garagetype, target_mean in garagetype_target.items():
-        df.loc[df['GarageType'] == garagetype, 'GarageType_Target'] = round(target_mean)
-    # df = pd.get_dummies(data=df, columns=['GarageType'], drop_first=True)
-
     df['GarageAge'] = (df['YrSold'] - df['GarageYrBlt'])
     df['GarageAge'] = df['GarageAge'].fillna(0)
     df['GarageAge'] = df['GarageAge'].astype(int)
@@ -173,30 +148,24 @@ def __handle_features(df: pd.DataFrame) -> pd.DataFrame:
     df['HouseAge'] = df['YrSold'] - df['YearBuilt']
     df['RemodAge'] = (df['YrSold'] - df['YearRemodAdd']).clip(lower=0)
 
-    df['SaleCondition_Target'] = 0
-    salecondition_target = df.groupby('SaleCondition')['SalePrice'].mean()
-    for salecondition, target_mean in salecondition_target.items():
-        df.loc[df['SaleCondition'] == salecondition, 'SaleCondition_Target'] = round(target_mean)
-    # df = pd.get_dummies(data=df, columns=['SaleCondition'], drop_first=True)
-
     return df
 
 
-# Удаляет ненужные фичи (остаётся 31 значимая + target)
+# Удаляет ненужные фичи
 def __delete_unnecessary_features(df: pd.DataFrame) -> pd.DataFrame:
     columns_to_save = ['MSSubClass_Rating', 'LotFrontage', 'LotArea', 'LotConfig_Rating', 'Neighborhood_Rating',
                        'Condition1_Rating', 'OverallQual', 'OverallCond', 'Exterior1st_Rating', 'ExterQual_Rating',
-                       'BsmtQual_Rating', 'BsmtExposure_Rating', 'BsmtFinType_Target', 'BsmtFinSF_Ratio',
-                       'TotalBsmtSF', 'CentralAir', 'GrLivArea', 'TotalBaths_Target', 'KitchenQual_Rating',
-                       'TotRmsAbvGrd_Rating', 'IsPerfectFunctional', 'Fireplaces_Rating', 'FireplaceQu_Target',
-                       'GarageType_Target', 'GarageAge', 'GarageCars_Rating', 'GarageArea', 'WoodDeckSF', 'HouseAge',
-                       'RemodAge', 'SaleCondition_Target', 'SalePrice']
+                       'BsmtQual_Rating', 'BsmtExposure_Rating', 'BsmtFinType1', 'BsmtFinSF_Ratio',
+                       'TotalBsmtSF', 'CentralAir', 'GrLivArea', 'TotalBaths', 'KitchenQual_Rating',
+                       'TotRmsAbvGrd_Rating', 'IsPerfectFunctional', 'Fireplaces_Rating', 'FireplaceQu',
+                       'GarageType', 'GarageAge', 'GarageCars_Rating', 'GarageArea', 'WoodDeckSF', 'HouseAge',
+                       'RemodAge', 'SaleCondition', 'SalePrice']
 
     df = df[columns_to_save]
     return df
 
 
-def preprocessing(df: pd.DataFrame) -> pd.DataFrame:
+def handling(df: pd.DataFrame) -> pd.DataFrame:
     df = __handle_null_values(df)
     df = __handle_features(df)
     df = __delete_unnecessary_features(df)
