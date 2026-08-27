@@ -2,13 +2,13 @@ import os
 import random
 import joblib
 
-import numpy as np
-import pandas as pd
 from catboost import CatBoostClassifier
 import torch
 
 from config import config
 from models_sklearn import *
+from models_boost import *
+from model_nn import *
 
 
 def run(config):
@@ -22,7 +22,8 @@ def run(config):
 
     linreg_model, linreg_acc, linreg_std = None, '—', '—'
     if config.linreg.train_mode:
-        linreg_model, linreg_acc, linreg_std = train_model_sklearn(train_data, model_name='linear_regression')
+        linreg_model, linreg_acc, linreg_std = train_model_sklearn(train_data.copy(),
+                                                                   model_name='linear_regression')
         joblib.dump(linreg_model, config.paths.path_save_models + 'linreg_model.joblib')
     else:
         try:
@@ -38,7 +39,8 @@ def run(config):
 
     linreg_l1_model, linreg_l1_acc, linreg_l1_std = None, '—', '—'
     if config.linreg_l1.train_mode:
-        linreg_l1_model, linreg_l1_acc, linreg_l1_std = train_model_sklearn(train_data, model_name='linear_regression_l1')
+        linreg_l1_model, linreg_l1_acc, linreg_l1_std = train_model_sklearn(train_data.copy(),
+                                                                            model_name='linear_regression_l1')
         joblib.dump(linreg_l1_model, config.paths.path_save_models + 'linreg_l1_model.joblib')
     else:
         try:
@@ -54,7 +56,8 @@ def run(config):
 
     linreg_l2_model, linreg_l2_acc, linreg_l2_std = None, '—', '—'
     if config.linreg_l2.train_mode:
-        linreg_l2_model, linreg_l2_acc, linreg_l2_std = train_model_sklearn(train_data, model_name='linear_regression_l2')
+        linreg_l2_model, linreg_l2_acc, linreg_l2_std = train_model_sklearn(train_data.copy(),
+                                                                            model_name='linear_regression_l2')
         joblib.dump(linreg_l2_model, config.paths.path_save_models + 'linreg_l2_model.joblib')
     else:
         try:
@@ -70,7 +73,7 @@ def run(config):
 
     linreg_en_model, linreg_en_acc, linreg_en_std = None, '—', '—'
     if config.linreg_elnet.train_mode:
-        linreg_en_model, linreg_en_acc, linreg_en_std = train_model_sklearn(train_data,
+        linreg_en_model, linreg_en_acc, linreg_en_std = train_model_sklearn(train_data.copy(),
                                                                             model_name='linear_regression_elasticnet')
         joblib.dump(linreg_en_model, config.paths.path_save_models + 'linreg_en_model.joblib')
     else:
@@ -87,7 +90,7 @@ def run(config):
 
     knn_model, knn_acc, knn_std = None, '—', '—'
     if config.knn.train_mode:
-        knn_model, knn_acc, knn_std = train_model_sklearn(train_data, model_name='knn')
+        knn_model, knn_acc, knn_std = train_model_sklearn(train_data.copy(), model_name='knn')
         joblib.dump(knn_model, config.paths.path_save_models + 'knn_model.joblib')
     else:
         try:
@@ -103,7 +106,7 @@ def run(config):
 
     dt_model, dt_acc, dt_std = None, '—', '—'
     if config.decision_tree.train_mode:
-        dt_model, dt_acc, dt_std = train_model_sklearn(train_data, model_name='decision_tree')
+        dt_model, dt_acc, dt_std = train_model_sklearn(train_data.copy(), model_name='decision_tree')
         joblib.dump(dt_model, config.paths.path_save_models + 'dt_model.joblib')
     else:
         try:
@@ -119,7 +122,7 @@ def run(config):
 
     rf_model, rf_acc, rf_std = None, '—', '—'
     if config.random_forest.train_mode:
-        rf_model, rf_acc, rf_std = train_model_sklearn(train_data, model_name='random_forest')
+        rf_model, rf_acc, rf_std = train_model_sklearn(train_data.copy(), model_name='random_forest')
         joblib.dump(rf_model, config.paths.path_save_models + 'rf_model.joblib')
     else:
         try:
@@ -130,12 +133,12 @@ def run(config):
 
     model_data.append(['RandomForest', rf_acc, rf_std, config.lb_scores.rf])
     # test_model_sklearn(data=test_data, model=rf_model, model_name='random_forest')
-    '''
+
     # ↓↓↓ Бустинг CatBoost ↓↓↓
 
     catboost_model, catboost_acc, catboost_std = None, '—', '—'
     if config.catboost.train_mode:
-        catboost_model, catboost_acc, catboost_std = train_catboost(X, y)
+        catboost_model, catboost_acc, catboost_std = train_catboost(train_data.copy())
         catboost_model.save_model(config.paths.path_save_models + 'catboost_model.cbm')
     else:
         try:
@@ -146,13 +149,13 @@ def run(config):
                   f'Проверьте наличие файла "catboost_model.cbm" в {config.paths.path_save_models}')
 
     model_data.append(['CatBoost', catboost_acc, catboost_std, config.lb_scores.catboost])
-    test_boost(X=test_data, model=catboost_model, model_name='catboost')
+    # test_boost(X=test_data, model=catboost_model, model_name='catboost')
 
     # ↓↓↓ Бустинг LightGBM ↓↓↓
 
     lightgbm_model, lightgbm_acc, lightgbm_std = None, '—', '—'
     if config.lightgbm.train_mode:
-        lightgbm_model, lightgbm_acc, lightgbm_std = train_lightgbm(X, y)
+        lightgbm_model, lightgbm_acc, lightgbm_std = train_lightgbm(train_data.copy())
         lightgbm_model.booster_.save_model(config.paths.path_save_models + 'lightgbm_model.txt')
     else:
         try:
@@ -162,13 +165,13 @@ def run(config):
                   f'Проверьте наличие файла "lightgbm_model.txt" в {config.paths.path_save_models}')
 
     model_data.append(['LightGBM', lightgbm_acc, lightgbm_std, config.lb_scores.lightgbm])
-    test_boost(X=test_data, model=lightgbm_model, model_name='lightgbm')
+    # test_boost(X=test_data, model=lightgbm_model, model_name='lightgbm')
 
     # ↓↓↓ Бустинг XGBoost ↓↓↓
 
     xgboost_model, xgboost_acc, xgboost_std = None, '—', '—'
     if config.xgboost.train_mode:
-        xgboost_model, xgboost_acc, xgboost_std = train_xgboost(X, y)
+        xgboost_model, xgboost_acc, xgboost_std = train_xgboost(train_data.copy())
         xgboost_model.save_model(config.paths.path_save_models + 'xgboost_model.json')
     else:
         try:
@@ -179,13 +182,13 @@ def run(config):
                   f'Проверьте наличие файла "xgboost_model.json" в {config.paths.path_save_models}')
 
     model_data.append(['XGBoost', xgboost_acc, xgboost_std, config.lb_scores.xgboost])
-    test_boost(X=test_data, model=xgboost_model, model_name='xgboost')
+    # test_boost(X=test_data, model=xgboost_model, model_name='xgboost')
 
     # ↓↓↓ Нейронная сеть ↓↓↓
 
     nn_model, nn_acc = None, "—"
     if config.neural_network.train_mode:
-        nn_model, nn_acc = train_nn(X, y)
+        nn_model, nn_acc = train_nn(train_data)
         nn_model.to('cpu')
         torch.save(nn_model, config.paths.path_save_models + 'nn_model.pt')
     else:
@@ -197,8 +200,8 @@ def run(config):
                   f'Проверьте наличие файла "nn_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['NeuralNetwork', nn_acc, '—', config.lb_scores.nn])
-    test_nn(X=test_data, model=nn_model)
-
+    # test_nn(X=test_data, model=nn_model)
+    '''
     # ↓↓↓ Ансамбль Bagging ↓↓↓
 
     bagging_model, bagging_acc, bagging_std = None, '—', '—'

@@ -12,7 +12,7 @@ config = {
         'path_save_models': './content/models/'
     },
     'training': {
-        'device': 'cpu',
+        'device': 'cuda',
         'n_splits': 5
     },
     'lb_scores': {
@@ -95,7 +95,7 @@ config = {
             'iterations': 100,
             'learning_rate': 0.075,
             'depth': 5,
-            'loss_function': 'Logloss'
+            'loss_function': 'RMSE'
         }
     },
     'lightgbm': {
@@ -109,7 +109,7 @@ config = {
     'xgboost': {
         'train_mode': True,
         'params': {
-            'num_boost_round': 1000,
+            'n_estimators': 1000,
             'learning_rate': 0.1,
             'max_depth': 5,
             'subsample': 0.75
@@ -119,7 +119,7 @@ config = {
         'train_mode': True,
         'num_epochs': 20,
         'loss_fn': {
-            'name': 'BCELoss',
+            'name': 'MSELoss',
             'params': {
             }
         },

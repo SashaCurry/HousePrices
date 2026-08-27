@@ -3,16 +3,16 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, TargetEncoder, O
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDRegressor
-from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
 
 from config import config
 from data_handle import *
 
 
 def train_model_sklearn(train_data, model_name='linear_regression'):
-    train_data_handled = handling(train_data)
+    train_data_handled = handling_for_linear(train_data)
 
     X = train_data_handled.drop(columns=['SalePrice'])
     y = train_data_handled['SalePrice']
@@ -92,12 +92,12 @@ def train_model_sklearn(train_data, model_name='linear_regression'):
 
 
 def test_model_sklearn(data, model, model_name):
-    test_data_handled = handling(data)
+    test_data_handled = handling_for_linear(data)
     X_test = test_data_handled.drop(columns=['SalePrice'])
 
     preds = model.predict(X_test)
 
-    df = pd.DataFrame({'PassengerId': X['Id'],
+    df = pd.DataFrame({'PassengerId': X_test['Id'],
                        'SalePrice': preds})
     df.to_csv(path_or_buf=f'{config.paths.path_save_csv}{model_name}_preds.csv',
               index=False)

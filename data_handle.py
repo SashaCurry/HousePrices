@@ -33,6 +33,8 @@ def __handle_null_values(df: pd.DataFrame) -> pd.DataFrame:
 
     df.loc[df['Fence'].isnull(), 'Fence'] = 'Absent'
 
+    df['MiscFeature'] = df['MiscFeature'].fillna('Absent')
+
     return df
 
 
@@ -151,7 +153,7 @@ def __handle_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# Удаляет ненужные фичи
+# Удаляет ненужные фичи (остаётся 31 фича + таргет)
 def __delete_unnecessary_features(df: pd.DataFrame) -> pd.DataFrame:
     columns_to_save = ['MSSubClass_Rating', 'LotFrontage', 'LotArea', 'LotConfig_Rating', 'Neighborhood_Rating',
                        'Condition1_Rating', 'OverallQual', 'OverallCond', 'Exterior1st_Rating', 'ExterQual_Rating',
@@ -165,9 +167,27 @@ def __delete_unnecessary_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def handling(df: pd.DataFrame) -> pd.DataFrame:
+def handling_for_linear(df: pd.DataFrame) -> pd.DataFrame:
     df = __handle_null_values(df)
     df = __handle_features(df)
     df = __delete_unnecessary_features(df)
+
+    return df
+
+
+# Для бустингов ничего не удаляю и не обрабатываю, просто создаю новые признаки и отдаю всё это
+def handling_for_boosting(df: pd.DataFrame) -> pd.DataFrame:
+    df = __handle_null_values(df)
+
+    df['GarageYrBlt'] = df['GarageYrBlt'].fillna(-1)
+
+    df['BsmtFinSF_Ratio'] = np.where(df['TotalBsmtSF'] > 0,
+                                     (df['BsmtFinSF1'] + df['BsmtFinSF2']) / df['TotalBsmtSF'],
+                                     0)
+    df['BsmtFinSF_Ratio'] = round(df['BsmtFinSF_Ratio'], 1)
+
+    df['TotalBaths'] = df['BsmtFullBath'] + 0.5 * df['BsmtHalfBath'] + df['FullBath'] + 0.5 * df['HalfBath']
+
+    df['IsPerfectFunctional'] = (df['Functional'] == 'Typ').astype(int)
 
     return df
