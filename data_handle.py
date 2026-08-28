@@ -1,5 +1,8 @@
 import numpy as np
 import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import TargetEncoder, StandardScaler, MinMaxScaler
 
 
 # Заполняет null-значения
@@ -167,6 +170,7 @@ def __delete_unnecessary_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+# Главный метод для обработки данных
 def handling_for_linear(df: pd.DataFrame) -> pd.DataFrame:
     df = __handle_null_values(df)
     df = __handle_features(df)
@@ -175,7 +179,11 @@ def handling_for_linear(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# Для бустингов ничего не удаляю и не обрабатываю, просто создаю новые признаки и отдаю всё это
+
+
+
+# Метод обработки данных для бустингов:
+# Здесь ничего не удаляю и не обрабатываю, просто создаю новые признаки и отдаю всё это
 def handling_for_boosting(df: pd.DataFrame) -> pd.DataFrame:
     df = __handle_null_values(df)
 
@@ -191,3 +199,27 @@ def handling_for_boosting(df: pd.DataFrame) -> pd.DataFrame:
     df['IsPerfectFunctional'] = (df['Functional'] == 'Typ').astype(int)
 
     return df
+
+
+
+
+
+# Ниже идёт код, отвечающий за target-encoding и нормализацию данных (вынес сюда для сохранения принципа DRY)
+__target_pipeline = Pipeline([
+    ('encoder', TargetEncoder(target_type='continuous')),
+    ('scaler', StandardScaler())
+])
+
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('target', __target_pipeline, ['BsmtFinType1', 'TotalBaths', 'FireplaceQu', 'GarageType', 'SaleCondition']),
+        ('cat', MinMaxScaler(), ['MSSubClass_Rating', 'LotConfig_Rating', 'Neighborhood_Rating',
+                                 'Condition1_Rating', 'OverallQual', 'Exterior1st_Rating', 'ExterQual_Rating',
+                                 'BsmtQual_Rating', 'BsmtExposure_Rating', 'BsmtFinSF_Ratio', 'KitchenQual_Rating',
+                                 'TotRmsAbvGrd_Rating', 'Fireplaces_Rating', 'GarageCars_Rating']),
+        ('num', StandardScaler(), ['LotFrontage', 'LotArea', 'TotalBsmtSF', 'GrLivArea', 'GarageAge',
+                                   'GarageArea', 'WoodDeckSF', 'HouseAge', 'RemodAge'])
+    ],
+    remainder='passthrough'
+)

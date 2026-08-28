@@ -1,7 +1,4 @@
 from sklearn.model_selection import KFold
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, TargetEncoder, OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
@@ -16,24 +13,6 @@ def train_model_sklearn(train_data, model_name='linear_regression'):
 
     X = train_data_handled.drop(columns=['SalePrice'])
     y = train_data_handled['SalePrice']
-
-    target_pipeline = Pipeline([
-        ('encoder', TargetEncoder(target_type='continuous')),
-        ('scaler', StandardScaler())
-    ])
-
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ('target', target_pipeline, ['BsmtFinType1', 'TotalBaths', 'FireplaceQu', 'GarageType', 'SaleCondition']),
-            ('cat', MinMaxScaler(), ['MSSubClass_Rating', 'LotConfig_Rating', 'Neighborhood_Rating',
-                                     'Condition1_Rating', 'OverallQual', 'Exterior1st_Rating', 'ExterQual_Rating',
-                                     'BsmtQual_Rating', 'BsmtExposure_Rating', 'BsmtFinSF_Ratio', 'KitchenQual_Rating',
-                                     'TotRmsAbvGrd_Rating', 'Fireplaces_Rating', 'GarageCars_Rating']),
-            ('num', StandardScaler(), ['LotFrontage', 'LotArea', 'TotalBsmtSF', 'GrLivArea', 'GarageAge',
-                                       'GarageArea', 'WoodDeckSF', 'HouseAge', 'RemodAge'])
-        ],
-        remainder='passthrough'
-    )
 
     model = None
     if model_name == 'linear_regression':

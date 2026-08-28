@@ -3,7 +3,7 @@ from omegaconf import OmegaConf
 config = {
     'general': {
         'experiment_name': 'HousePrices_v1.0',
-        'seed': 0xFACED,
+        'seed': 0x555
     },
     'paths': {
         'path_to_train': './content/data/train.csv',
@@ -117,33 +117,35 @@ config = {
     },
     'neural_network': {
         'train_mode': True,
-        'num_epochs': 20,
+        'num_epochs': 50,
+        'batch_size': 32,
         'loss_fn': {
             'name': 'MSELoss',
             'params': {
             }
         },
         'optimizer': {
-            'name': 'Adam',
+            'name': 'AdamW',
             'params': {
-                'lr': 0.001
+                'lr': 0.001,
             }
         },
         'scheduler': {
-            'name': 'CosineAnnealingLR',
+            'name': 'ReduceLROnPlateau',
             'params': {
-                'T_max': 100,
-                'eta_min': 1e-6
+                'mode': 'min',
+                'factor': 0.5,
+                'patience': 5
             }
         }
     },
     'bagging': {
         'train_mode': True,
         'base_model': {
-            'module': 'tree',
-            'name': 'DecisionTreeClassifier',
+            'module': 'sklearn.tree',
+            'name': 'DecisionTreeRegressor',
             'params': {
-                'max_depth': 6
+                'max_depth': 15
             }
         },
         'params': {

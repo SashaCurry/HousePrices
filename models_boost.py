@@ -24,26 +24,20 @@ def train_catboost(train_data):
     X = train_data_handled.drop(columns=['SalePrice'])
     y = train_data_handled[['SalePrice']]
 
-    data_pool = cb.Pool(
-        data=X,
-        label=y,
-        cat_features=CAT_FEATURES)
+    model = cb.CatBoostRegressor(**config.catboost.params,
+                                 verbose=False)
 
-    params = {**config.catboost.params,
-              'eval_metric': 'R2'}
-
-    cv_data = cb.cv(
-        pool=data_pool,
-        params=params,
-        fold_count=config.training.n_splits,
-        shuffle=True,
-        partition_random_seed=config.general.seed,
-        early_stopping_rounds=50,
-        logging_level='Silent'
+    cv_scores = cross_val_score(
+        estimator=model,
+        X=X,
+        y=y,
+        cv=config.training.n_splits,
+        scoring='r2',
+        params={'cat_features': CAT_FEATURES}
     )
 
-    model_acc = round(cv_data.tail(1)['test-R2-mean'].item(), 2)
-    model_std = round(cv_data.tail(1)['test-R2-std'].item(), 2)
+    model_acc = round(cv_scores.mean(), 2)
+    model_std = round(cv_scores.std(), 2)
 
     model = cb.CatBoostRegressor(
         **config.catboost.params,

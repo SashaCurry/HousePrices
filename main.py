@@ -9,6 +9,7 @@ from config import config
 from models_sklearn import *
 from models_boost import *
 from model_nn import *
+from models_ensembles import *
 
 
 def run(config):
@@ -17,7 +18,7 @@ def run(config):
 
     # Суммарная информация о всех моделях и их метриках
     model_data = []
-
+    '''
     # ↓↓↓ Линейная регрессия ↓↓↓
 
     linreg_model, linreg_acc, linreg_std = None, '—', '—'
@@ -183,12 +184,12 @@ def run(config):
 
     model_data.append(['XGBoost', xgboost_acc, xgboost_std, config.lb_scores.xgboost])
     # test_boost(X=test_data, model=xgboost_model, model_name='xgboost')
-
+    
     # ↓↓↓ Нейронная сеть ↓↓↓
 
     nn_model, nn_acc = None, "—"
     if config.neural_network.train_mode:
-        nn_model, nn_acc = train_nn(train_data)
+        nn_model, nn_acc = train_nn(train_data.copy())
         nn_model.to('cpu')
         torch.save(nn_model, config.paths.path_save_models + 'nn_model.pt')
     else:
@@ -201,12 +202,12 @@ def run(config):
 
     model_data.append(['NeuralNetwork', nn_acc, '—', config.lb_scores.nn])
     # test_nn(X=test_data, model=nn_model)
-    '''
+
     # ↓↓↓ Ансамбль Bagging ↓↓↓
 
     bagging_model, bagging_acc, bagging_std = None, '—', '—'
     if config.bagging.train_mode:
-        bagging_model, bagging_acc, bagging_std = train_bagging(X, y)
+        bagging_model, bagging_acc, bagging_std = train_bagging(train_data)
         joblib.dump(bagging_model, config.paths.path_save_models + 'bagging_model.joblib')
     else:
         try:
@@ -216,9 +217,9 @@ def run(config):
                   f'Проверьте наличие файла "bagging_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['Bagging', bagging_acc, bagging_std, config.lb_scores.bagging])
-    test_bagging(X=test_data, model=bagging_model)
-
-    # ↓↓↓ Ансамбль Stacking via LogReg ↓↓↓
+    # test_bagging(X=test_data, model=bagging_model)
+    '''
+    # ↓↓↓ Ансамбль Stacking via LinReg ↓↓↓
 
     stacking_model, stacking_acc, stacking_std = None, '—', '—'
     if config.stacking.train_mode:
@@ -231,10 +232,10 @@ def run(config):
             print(f'Модель stacking не загружена. '
                   f'Проверьте наличие файла "stacking_model.joblib" в {config.paths.path_save_models}')
 
-    model_data.append(['Stacking via LogReg', stacking_acc, stacking_std, config.lb_scores.stacking])
-    test_stacking(X=test_data, models=stacking_model, model_name='stacking')
-
-    # ↓↓↓ Ансамбль Stacking via LogReg-L2 ↓↓↓
+    model_data.append(['Stacking via LinReg', stacking_acc, stacking_std, config.lb_scores.stacking])
+    # test_stacking(X=test_data, models=stacking_model, model_name='stacking')
+    '''
+    # ↓↓↓ Ансамбль Stacking via LinReg-L2 ↓↓↓
 
     stacking_l2_model, stacking_l2_acc, stacking_l2_std = None, '—', '—'
     if config.stacking_l2.train_mode:
@@ -247,7 +248,7 @@ def run(config):
             print(f'Модель stacking_l2 не загружена. '
                   f'Проверьте наличие файла "stacking_l2_model.joblib" в {config.paths.path_save_models}')
 
-    model_data.append(['Stacking via LogReg-L2', stacking_l2_acc, stacking_l2_std, config.lb_scores.stacking_l2])
+    model_data.append(['Stacking via LinReg-L2', stacking_l2_acc, stacking_l2_std, config.lb_scores.stacking_l2])
     test_stacking(X=test_data, models=stacking_l2_model, model_name='stacking_l2')
     '''
     # Total output
