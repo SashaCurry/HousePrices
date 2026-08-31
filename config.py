@@ -156,32 +156,46 @@ config = {
         'train_mode': True,
         'base_models': [
             {
-                'module': 'neighbors',
-                'name': 'KNeighborsClassifier',
+                'module': 'sklearn.linear_model',
+                'name': 'SGDRegressor',
+                'params': {
+                    'loss': 'squared_error',
+                    'penalty': 'l2',
+                    'alpha': 0.001,
+                    'max_iter': 1000
+                }
+            },
+            {
+                'module': 'sklearn.ensemble',
+                'name': 'RandomForestRegressor',
+                'params': {
+                    'n_estimators': 100,
+                    'max_depth': 3
+                }
+            },
+            {
+                'module': 'sklearn.neighbors',
+                'name': 'KNeighborsRegressor',
                 'params': {
                     'n_neighbors': 6
                 }
             },
             {
-                'module': 'tree',
-                'name': 'DecisionTreeClassifier',
+                'module': 'catboost',
+                'name': 'CatBoostRegressor',
                 'params': {
-                    'max_depth': 3
-                }
-            },
-            {
-                'module': 'ensemble',
-                'name': 'RandomForestClassifier',
-                'params': {
-                    'n_estimators': 100
+                    'iterations': 100,
+                    'depth': 5,
+                    'loss_function': 'RMSE',
+                    'verbose': 0
                 }
             }
         ],
         'meta_model': {
-            'module': 'linear_model',
-            'name': 'LogisticRegression',
+            'module': 'sklearn.linear_model',
+            'name': 'SGDRegressor',
             'params': {
-                'max_iter': 1000
+                'max_iter': 1000,
             }
         }
     },
@@ -189,33 +203,48 @@ config = {
         'train_mode': True,
         'base_models': [
             {
-                'module': 'neighbors',
-                'name': 'KNeighborsClassifier',
+                'module': 'sklearn.linear_model',
+                'name': 'SGDRegressor',
+                'params': {
+                    'loss': 'squared_error',
+                    'penalty': 'l2',
+                    'alpha': 0.001,
+                    'max_iter': 1000
+                }
+            },
+            {
+                'module': 'sklearn.ensemble',
+                'name': 'RandomForestRegressor',
+                'params': {
+                    'n_estimators': 100,
+                    'max_depth': 3
+                }
+            },
+            {
+                'module': 'sklearn.neighbors',
+                'name': 'KNeighborsRegressor',
                 'params': {
                     'n_neighbors': 6
                 }
             },
             {
-                'module': 'tree',
-                'name': 'DecisionTreeClassifier',
+                'module': 'catboost',
+                'name': 'CatBoostRegressor',
                 'params': {
-                    'max_depth': 3
-                }
-            },
-            {
-                'module': 'ensemble',
-                'name': 'RandomForestClassifier',
-                'params': {
-                    'n_estimators': 100
+                    'iterations': 100,
+                    'depth': 5,
+                    'loss_function': 'RMSE',
+                    'verbose': 0
                 }
             }
         ],
         'meta_model': {
-            'module': 'linear_model',
-            'name': 'LogisticRegression',
+            'module': 'sklearn.linear_model',
+            'name': 'SGDRegressor',
             'params': {
                 'max_iter': 1000,
-                'l1_ratio': 0.0
+                'penalty': 'l2',
+                'alpha': 0.01
             }
         }
     }

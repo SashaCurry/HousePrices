@@ -3,9 +3,7 @@ import random
 import joblib
 
 from catboost import CatBoostClassifier
-import torch
 
-from config import config
 from models_sklearn import *
 from models_boost import *
 from model_nn import *
@@ -18,7 +16,7 @@ def run(config):
 
     # Суммарная информация о всех моделях и их метриках
     model_data = []
-    '''
+
     # ↓↓↓ Линейная регрессия ↓↓↓
 
     linreg_model, linreg_acc, linreg_std = None, '—', '—'
@@ -218,12 +216,12 @@ def run(config):
 
     model_data.append(['Bagging', bagging_acc, bagging_std, config.lb_scores.bagging])
     # test_bagging(X=test_data, model=bagging_model)
-    '''
+    
     # ↓↓↓ Ансамбль Stacking via LinReg ↓↓↓
 
     stacking_model, stacking_acc, stacking_std = None, '—', '—'
     if config.stacking.train_mode:
-        stacking_model, stacking_acc, stacking_std = train_stacking(X, y)
+        stacking_model, stacking_acc, stacking_std = train_stacking(train_data)
         joblib.dump(stacking_model, config.paths.path_save_models + 'stacking_model.joblib')
     else:
         try:
@@ -234,12 +232,12 @@ def run(config):
 
     model_data.append(['Stacking via LinReg', stacking_acc, stacking_std, config.lb_scores.stacking])
     # test_stacking(X=test_data, models=stacking_model, model_name='stacking')
-    '''
+    
     # ↓↓↓ Ансамбль Stacking via LinReg-L2 ↓↓↓
 
     stacking_l2_model, stacking_l2_acc, stacking_l2_std = None, '—', '—'
     if config.stacking_l2.train_mode:
-        stacking_l2_model, stacking_l2_acc, stacking_l2_std = train_stacking_l2(X, y)
+        stacking_l2_model, stacking_l2_acc, stacking_l2_std = train_stacking_l2(train_data)
         joblib.dump(stacking_l2_model, config.paths.path_save_models + 'stacking_l2_model.joblib')
     else:
         try:
@@ -249,8 +247,8 @@ def run(config):
                   f'Проверьте наличие файла "stacking_l2_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['Stacking via LinReg-L2', stacking_l2_acc, stacking_l2_std, config.lb_scores.stacking_l2])
-    test_stacking(X=test_data, models=stacking_l2_model, model_name='stacking_l2')
-    '''
+    # test_stacking(X=test_data, models=stacking_l2_model, model_name='stacking_l2')
+
     # Total output
 
     header = f'{"Approach":<22} | {"CV":>10} | {"CV STD":>10} | {"LB":>10}'
