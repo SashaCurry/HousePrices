@@ -104,3 +104,15 @@ def train_xgboost(train_data):
     model.fit(X, y)
 
     return model, model_acc, model_std
+
+
+def test_boost(data, model, model_name):
+    X_test = handling_for_boosting(data)
+    X_test[CAT_FEATURES] = X_test[CAT_FEATURES].astype('category')
+
+    preds = model.predict(X_test)
+
+    df = pd.DataFrame({'Id': data['Id'],
+                       'SalePrice': preds})
+    df.to_csv(path_or_buf=f'{config.paths.path_save_csv}{model_name}_preds.csv',
+              index=False)

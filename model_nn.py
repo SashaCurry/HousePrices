@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import TensorDataset, DataLoader, random_split
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
@@ -134,7 +134,27 @@ def train_nn(train_data):
         val_loss = val_loss / len(val_loader)
         scheduler.step(val_loss)
 
-    return model, round(mean_val_acc, 2)
+    return model, preprocessor, y_scaler, round(mean_val_acc, 2)
 
 
 ## TODO: при реализации тестирование не забыть отмасштабировать таргет обратно
+def test_nn(test_data, model_state, preprocessor, y_scaler):
+    X_test = handling_for_linear(test_data)
+
+    X_scaled = preprocessor.transform(X_test)
+
+    X_tensor = torch.tensor(data=X_scaled,
+                            dtype=torch.float32,
+                            device=config.training.device)
+
+    model = HousePricesNN(input=X_tensor.shape[1]).to(config.training.device)
+    model.load_state_dict(model_state)
+    model.eval()
+
+    with torch.no_grad():
+        preds = model(X_tensor).numpy()
+    preds = y_scaler.inverse_transform(preds).flatten()
+
+    df = pd.DataFrame({'Id': test_data['Id'],
+                       'SalePrice': preds})
+    df.to_csv(path_or_buf=f'{config.paths.path_save_csv}nn_preds.csv', index=False)

@@ -30,6 +30,17 @@ def train_bagging(train_data):
     return bagging_model, model_acc, model_std
 
 
+def test_bagging(test_data, model, model_name='bagging'):
+    X_test = handling_for_linear(test_data)
+
+    preds = model.predict(X_test)
+
+    df = pd.DataFrame({'Id': test_data['Id'],
+                       'SalePrice': preds})
+    df.to_csv(path_or_buf=f'{config.paths.path_save_csv}{model_name}_preds.csv',
+              index=False)
+
+
 def train_stacking(train_data):
     train_data_handled = handling_for_linear(train_data)
 
@@ -100,3 +111,14 @@ def train_stacking_l2(train_data):
 
     stacking_model.fit(X, y)
     return stacking_model, model_acc, model_std
+
+
+def test_stacking(test_data, model, model_name='stacking'):
+    X_test = handling_for_linear(test_data)
+
+    preds = model.predict(X_test)
+
+    df = pd.DataFrame({'Id': test_data['Id'],
+                       'SalePrice': preds})
+    df.to_csv(path_or_buf=f'{config.paths.path_save_csv}{model_name}_preds.csv',
+              index=False)

@@ -71,12 +71,12 @@ def train_model_sklearn(train_data, model_name='linear_regression'):
 
 
 def test_model_sklearn(data, model, model_name):
-    test_data_handled = handling_for_linear(data)
-    X_test = test_data_handled.drop(columns=['SalePrice'])
+    X_test = handling_for_linear(data)
+    # print(X_test[X_test.isnull().any(axis=0)])
 
     preds = model.predict(X_test)
 
-    df = pd.DataFrame({'PassengerId': X_test['Id'],
+    df = pd.DataFrame({'Id': data['Id'],
                        'SalePrice': preds})
     df.to_csv(path_or_buf=f'{config.paths.path_save_csv}{model_name}_preds.csv',
               index=False)

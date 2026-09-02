@@ -7,30 +7,70 @@ from sklearn.preprocessing import TargetEncoder, StandardScaler, MinMaxScaler
 
 # Заполняет null-значения
 def __handle_null_values(df: pd.DataFrame) -> pd.DataFrame:
+    df['MSSubClass'] = df['MSSubClass'].fillna(20)
+    df['MSZoning'] = df['MSZoning'].fillna('RL')
+
     lotfrontage_null = df.groupby('LotConfig')['LotFrontage'].mean().round()
     for value, mean in lotfrontage_null.items():
         df.loc[(df['LotFrontage'].isnull()) & (df['LotConfig'] == value), 'LotFrontage'] = mean
 
+    df['LotArea'] = df['LotArea'].fillna(10517)
+
     df.loc[df['Alley'].isnull(), 'Alley'] = 'Absent'
+
+    df['Utilities'] = df['Utilities'].fillna('AllPub')
+
+    df['LotConfig'] = df['LotConfig'].fillna('Inside')
+
+    df['Neighborhood'] = df['Neighborhood'].fillna('NAmes')
+
+    df['Condition1'] = df['Condition1'].fillna('Norm')
+
+    df['OverallQual'] = df['OverallQual'].fillna(6)
+    df['OverallCond'] = df['OverallCond'].fillna(5)
+
+    df['Exterior1st'] = df['Exterior1st'].fillna('VinylSd')
+    df['Exterior2nd'] = df['Exterior2nd'].fillna('VinylSd')
 
     df.loc[df['MasVnrType'].isnull(), 'MasVnrType'] = 'Absent'
     df.loc[df['MasVnrArea'].isnull(), 'MasVnrArea'] = 0
 
+    df['ExterQual'] = df['ExterQual'].fillna('TA')
+
     df.loc[df['BsmtQual'].isnull(), 'BsmtQual'] = 'Absent'
     df.loc[df['BsmtCond'].isnull(), 'BsmtCond'] = 'Absent'
     df.loc[df['BsmtExposure'].isnull(), 'BsmtExposure'] = 'Absent'
+
     df.loc[df['BsmtFinType1'].isnull(), 'BsmtFinType1'] = 'Absent'
-    df.loc[(df['BsmtFinType2'].isnull()) & (df['BsmtFinSF2'] > 0), 'BsmtFinType2'] = 'Rec'
+    df.loc[df['BsmtFinSF1'].isnull(), 'BsmtFinSF1'] = 0.0
+
     df.loc[df['BsmtFinType2'].isnull(), 'BsmtFinType2'] = 'Absent'
+    df.loc[df['BsmtFinSF2'].isnull(), 'BsmtFinSF2'] = 0.0
+
+    df.loc[df['BsmtUnfSF'].isnull(), 'BsmtUnfSF'] = 0.0
+    df.loc[df['TotalBsmtSF'].isnull(), 'TotalBsmtSF'] = 0.0
+
+    df.loc[df['BsmtHalfBath'].isnull(), 'BsmtHalfBath'] = 0.0
+    df.loc[df['BsmtFullBath'].isnull(), 'BsmtHalfBath'] = 0.0
+
+    df['CentralAir'] = df['CentralAir'].fillna('Y')
 
     df.loc[df['Electrical'].isnull(), 'Electrical'] = 'SBrkr'
 
+    df['KitchenQual'] = df['KitchenQual'].fillna('TA')
+
+    df['Functional'] = df['Functional'].fillna('Typ')
+
+    df['Fireplaces'] = df['Fireplaces'].fillna(0.0)
     df.loc[df['FireplaceQu'].isnull(), 'FireplaceQu'] = 'Absent'
 
     df.loc[df['GarageType'].isnull(), 'GarageType'] = 'Absent'
     df.loc[df['GarageFinish'].isnull(), 'GarageFinish'] = 'Absent'
     df.loc[df['GarageQual'].isnull(), 'GarageQual'] = 'Absent'
     df.loc[df['GarageCond'].isnull(), 'GarageCond'] = 'Absent'
+    df.loc[df['GarageArea'].isnull(), 'GarageArea'] = 0.0
+
+    df['WoodDeckSF'] = df['WoodDeckSF'].fillna(0.0)
 
     df.loc[df['PoolQC'].isnull(), 'PoolQC'] = 'Absent'
 
@@ -38,15 +78,30 @@ def __handle_null_values(df: pd.DataFrame) -> pd.DataFrame:
 
     df['MiscFeature'] = df['MiscFeature'].fillna('Absent')
 
+    df['SaleType'] = df['SaleType'].fillna('WD')
+    df['SaleCondition'] = df['SaleCondition'].fillna('Normal')
+
     return df
 
 
 # Фича-инженеринг, обработка категориальных фич
 def __handle_features(df: pd.DataFrame) -> pd.DataFrame:
     df['MSSubClass_Rating'] = 0
-    mssubclass_sorted = df.groupby('MSSubClass', as_index=False)['SalePrice'].mean().sort_values('SalePrice')
-    for idx, mssubclass in enumerate(mssubclass_sorted['MSSubClass']):
-        df.loc[df['MSSubClass'] == mssubclass, 'MSSubClass_Rating'] = idx + 1
+    df.loc[df['MSSubClass'] == 30, 'MSSubClass_Rating'] = 1
+    df.loc[df['MSSubClass'] == 180, 'MSSubClass_Rating'] = 2
+    df.loc[df['MSSubClass'] == 45, 'MSSubClass_Rating'] = 3
+    df.loc[df['MSSubClass'] == 190, 'MSSubClass_Rating'] = 4
+    df.loc[df['MSSubClass'] == 90, 'MSSubClass_Rating'] = 5
+    df.loc[df['MSSubClass'] == 160, 'MSSubClass_Rating'] = 6
+    df.loc[df['MSSubClass'] == 50, 'MSSubClass_Rating'] = 7
+    df.loc[df['MSSubClass'] == 85, 'MSSubClass_Rating'] = 8
+    df.loc[df['MSSubClass'] == 40, 'MSSubClass_Rating'] = 9
+    df.loc[df['MSSubClass'] == 70, 'MSSubClass_Rating'] = 10
+    df.loc[df['MSSubClass'] == 80, 'MSSubClass_Rating'] = 11
+    df.loc[df['MSSubClass'] == 20, 'MSSubClass_Rating'] = 12
+    df.loc[df['MSSubClass'] == 75, 'MSSubClass_Rating'] = 13
+    df.loc[df['MSSubClass'] == 120, 'MSSubClass_Rating'] = 14
+    df.loc[df['MSSubClass'] == 60, 'MSSubClass_Rating'] = 15
 
     df['LotConfig_Rating'] = 0.0
     df.loc[df['LotConfig'] == 'Inside', 'LotConfig_Rating'] = 1
@@ -153,6 +208,8 @@ def __handle_features(df: pd.DataFrame) -> pd.DataFrame:
     df['HouseAge'] = df['YrSold'] - df['YearBuilt']
     df['RemodAge'] = (df['YrSold'] - df['YearRemodAdd']).clip(lower=0)
 
+    df['SaleCondition'] = df['SaleCondition'].fillna('Normal')
+
     return df
 
 
@@ -164,7 +221,9 @@ def __delete_unnecessary_features(df: pd.DataFrame) -> pd.DataFrame:
                        'TotalBsmtSF', 'CentralAir', 'GrLivArea', 'TotalBaths', 'KitchenQual_Rating',
                        'TotRmsAbvGrd_Rating', 'IsPerfectFunctional', 'Fireplaces_Rating', 'FireplaceQu',
                        'GarageType', 'GarageAge', 'GarageCars_Rating', 'GarageArea', 'WoodDeckSF', 'HouseAge',
-                       'RemodAge', 'SaleCondition', 'SalePrice']
+                       'RemodAge', 'SaleCondition']
+    if 'SalePrice' in df.columns:
+        columns_to_save.append('SalePrice')
 
     df = df[columns_to_save]
     return df

@@ -2,7 +2,7 @@ import os
 import random
 import joblib
 
-from catboost import CatBoostClassifier
+from catboost import CatBoostRegressor
 
 from models_sklearn import *
 from models_boost import *
@@ -32,7 +32,7 @@ def run(config):
                   f'Проверьте наличие файла "linreg_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['LinReg', linreg_acc, linreg_std, config.lb_scores.linreg])
-    # test_model_sklearn(data=test_data, model=linreg_model, model_name='linreg')
+    test_model_sklearn(data=test_data.copy(), model=linreg_model, model_name='linreg')
 
     # ↓↓↓ Линейная регрессия с L1-регуляризацией ↓↓↓
 
@@ -49,7 +49,7 @@ def run(config):
                   f'Проверьте наличие файла "linreg_l1_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['LinReg-L1', linreg_l1_acc, linreg_l1_std, config.lb_scores.linreg_l1])
-    # test_model_sklearn(data=test_data, model=linreg_l1_model, model_name='linreg_l1')
+    test_model_sklearn(data=test_data.copy(), model=linreg_l1_model, model_name='linreg_l1')
 
     # ↓↓↓ Линейная регрессия с L2-регуляризацией ↓↓↓
 
@@ -66,7 +66,7 @@ def run(config):
                   f'Проверьте наличие файла "linreg_l2_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['LinReg-L2', linreg_l2_acc, linreg_l2_std, config.lb_scores.linreg_l2])
-    # test_model_sklearn(data=test_data, model=linreg_l2_model, model_name='linreg_l2')
+    test_model_sklearn(data=test_data.copy(), model=linreg_l2_model, model_name='linreg_l2')
 
     # ↓↓↓ Линейная регрессия с ElasticNet-регуляризацией ↓↓↓
 
@@ -83,7 +83,7 @@ def run(config):
                   f'Проверьте наличие файла "linreg_en_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['LinReg-ElNet', linreg_en_acc, linreg_en_std, config.lb_scores.linreg_en])
-    # test_model_sklearn(data=test_data, model=linreg_en_model, model_name='linreg_en')
+    test_model_sklearn(data=test_data.copy(), model=linreg_en_model, model_name='linreg_en')
 
     # ↓↓↓ Метод ближайших соседей KNN ↓↓↓
 
@@ -99,7 +99,7 @@ def run(config):
                   f'Проверьте наличие файла "knn_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['KNN', knn_acc, knn_std, config.lb_scores.knn])
-    # test_model_sklearn(data=test_data, model=knn_model, model_name='knn')
+    test_model_sklearn(data=test_data.copy(), model=knn_model, model_name='knn')
 
     # ↓↓↓ Решающее дерево DecisionTree ↓↓↓
 
@@ -115,7 +115,7 @@ def run(config):
                   f'Проверьте наличие файла "dt_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['DecisionTree', dt_acc, dt_std, config.lb_scores.dt])
-    # test_model_sklearn(data=test_data, model=dt_model, model_name='decision_tree')
+    test_model_sklearn(data=test_data.copy(), model=dt_model, model_name='decision_tree')
 
     # ↓↓↓ Случайный лес RandomForest ↓↓↓
 
@@ -131,7 +131,7 @@ def run(config):
                   f'Проверьте наличие файла "rf_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['RandomForest', rf_acc, rf_std, config.lb_scores.rf])
-    # test_model_sklearn(data=test_data, model=rf_model, model_name='random_forest')
+    test_model_sklearn(data=test_data.copy(), model=rf_model, model_name='random_forest')
 
     # ↓↓↓ Бустинг CatBoost ↓↓↓
 
@@ -141,30 +141,30 @@ def run(config):
         catboost_model.save_model(config.paths.path_save_models + 'catboost_model.cbm')
     else:
         try:
-            catboost_model = CatBoostClassifier()
+            catboost_model = CatBoostRegressor()
             catboost_model = catboost_model.load_model(config.paths.path_save_models + 'catboost_model.cbm')
         except FileNotFoundError:
             print(f'Модель catboost не загружена. '
                   f'Проверьте наличие файла "catboost_model.cbm" в {config.paths.path_save_models}')
 
     model_data.append(['CatBoost', catboost_acc, catboost_std, config.lb_scores.catboost])
-    # test_boost(X=test_data, model=catboost_model, model_name='catboost')
+    test_boost(data=test_data.copy(), model=catboost_model, model_name='catboost')
 
     # ↓↓↓ Бустинг LightGBM ↓↓↓
 
     lightgbm_model, lightgbm_acc, lightgbm_std = None, '—', '—'
     if config.lightgbm.train_mode:
         lightgbm_model, lightgbm_acc, lightgbm_std = train_lightgbm(train_data.copy())
-        lightgbm_model.booster_.save_model(config.paths.path_save_models + 'lightgbm_model.txt')
+        joblib.dump(lightgbm_model, config.paths.path_save_models + 'lightgbm_model.pkl')
     else:
         try:
-            lightgbm_model = lgb.Booster(model_file=config.paths.path_save_models + 'lightgbm_model.txt')
+            lightgbm_model = joblib.load(config.paths.path_save_models + 'lightgbm_model.pkl')
         except FileNotFoundError:
             print(f'Модель lightgbm не загружена. '
-                  f'Проверьте наличие файла "lightgbm_model.txt" в {config.paths.path_save_models}')
+                  f'Проверьте наличие файла "lightgbm_model.pkl" в {config.paths.path_save_models}')
 
     model_data.append(['LightGBM', lightgbm_acc, lightgbm_std, config.lb_scores.lightgbm])
-    # test_boost(X=test_data, model=lightgbm_model, model_name='lightgbm')
+    test_boost(data=test_data.copy(), model=lightgbm_model, model_name='lightgbm')
 
     # ↓↓↓ Бустинг XGBoost ↓↓↓
 
@@ -174,32 +174,42 @@ def run(config):
         xgboost_model.save_model(config.paths.path_save_models + 'xgboost_model.json')
     else:
         try:
-            xgboost_model = xgb.XGBClassifier()
+            xgboost_model = xgb.XGBRegressor()
             xgboost_model.load_model(config.paths.path_save_models + 'xgboost_model.json')
         except FileNotFoundError:
             print(f'Модель xgboost не загружена. '
                   f'Проверьте наличие файла "xgboost_model.json" в {config.paths.path_save_models}')
 
     model_data.append(['XGBoost', xgboost_acc, xgboost_std, config.lb_scores.xgboost])
-    # test_boost(X=test_data, model=xgboost_model, model_name='xgboost')
+    test_boost(data=test_data.copy(), model=xgboost_model, model_name='xgboost')
     
     # ↓↓↓ Нейронная сеть ↓↓↓
 
-    nn_model, nn_acc = None, "—"
+    nn_model, nn_preprocessor, nn_y_scaler, nn_acc = None, None, None, "—"
+    nn_model_state = None
     if config.neural_network.train_mode:
-        nn_model, nn_acc = train_nn(train_data.copy())
+        nn_model, nn_preprocessor, nn_y_scaler, nn_acc = train_nn(train_data.copy())
         nn_model.to('cpu')
-        torch.save(nn_model, config.paths.path_save_models + 'nn_model.pt')
+        nn_model_state = nn_model.state_dict()
+        checkpoint = {
+            'model_state': nn_model_state,
+            'preprocessor': nn_preprocessor,
+            'y_scaler': nn_y_scaler
+        }
+        torch.save(checkpoint, config.paths.path_save_models + 'nn_model.pt')
     else:
         try:
-            nn_model = torch.load(f=config.paths.path_save_models + 'nn_model.pt',
-                                  weights_only=False)
+            checkpoint = torch.load(f=config.paths.path_save_models + 'nn_model.pt',
+                                    weights_only=False)
+            nn_model_state = checkpoint['model_state']
+            nn_preprocessor = checkpoint['preprocessor']
+            nn_y_scaler = checkpoint['y_scaler']
         except FileNotFoundError:
             print(f'Модель neural network не загружена. '
                   f'Проверьте наличие файла "nn_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['NeuralNetwork', nn_acc, '—', config.lb_scores.nn])
-    # test_nn(X=test_data, model=nn_model)
+    test_nn(test_data=test_data.copy(), model_state=nn_model_state, preprocessor=nn_preprocessor, y_scaler=nn_y_scaler)
 
     # ↓↓↓ Ансамбль Bagging ↓↓↓
 
@@ -215,7 +225,7 @@ def run(config):
                   f'Проверьте наличие файла "bagging_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['Bagging', bagging_acc, bagging_std, config.lb_scores.bagging])
-    # test_bagging(X=test_data, model=bagging_model)
+    test_bagging(test_data=test_data.copy(), model=bagging_model)
     
     # ↓↓↓ Ансамбль Stacking via LinReg ↓↓↓
 
@@ -231,7 +241,7 @@ def run(config):
                   f'Проверьте наличие файла "stacking_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['Stacking via LinReg', stacking_acc, stacking_std, config.lb_scores.stacking])
-    # test_stacking(X=test_data, models=stacking_model, model_name='stacking')
+    test_stacking(test_data=test_data.copy(), model=stacking_model, model_name='stacking')
     
     # ↓↓↓ Ансамбль Stacking via LinReg-L2 ↓↓↓
 
@@ -247,7 +257,7 @@ def run(config):
                   f'Проверьте наличие файла "stacking_l2_model.joblib" в {config.paths.path_save_models}')
 
     model_data.append(['Stacking via LinReg-L2', stacking_l2_acc, stacking_l2_std, config.lb_scores.stacking_l2])
-    # test_stacking(X=test_data, models=stacking_l2_model, model_name='stacking_l2')
+    test_stacking(test_data=test_data.copy(), model=stacking_l2_model, model_name='stacking_l2')
 
     # Total output
 

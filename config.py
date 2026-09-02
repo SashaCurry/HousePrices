@@ -12,7 +12,7 @@ config = {
         'path_save_models': './content/models/'
     },
     'training': {
-        'device': 'cuda',
+        'device': 'cpu',
         'n_splits': 5
     },
     'lb_scores': {
@@ -32,7 +32,7 @@ config = {
         'stacking_l2': 0
     },
     'linreg': {
-        'train_mode': True,
+        'train_mode': False,
         'params': {
             'loss': 'squared_error',
             'max_iter': 1000,
@@ -40,7 +40,7 @@ config = {
         }
     },
     'linreg_l1': {
-        'train_mode': True,
+        'train_mode': False,
         'params': {
             'loss': 'squared_error',
             'max_iter': 1000,
@@ -49,7 +49,7 @@ config = {
         }
     },
     'linreg_l2': {
-        'train_mode': True,
+        'train_mode': False,
         'params': {
             'loss': 'squared_error',
             'max_iter': 1000,
@@ -57,7 +57,7 @@ config = {
         }
     },
     'linreg_elnet': {
-        'train_mode': True,
+        'train_mode': False,
         'params': {
             'loss': 'squared_error',
             'max_iter': 1000,
@@ -66,7 +66,7 @@ config = {
         }
     },
     'knn': {
-        'train_mode': True,
+        'train_mode': False,
         'params': {
             'n_neighbors': 5,
             'weights': 'distance',
@@ -74,7 +74,7 @@ config = {
         }
     },
     'decision_tree': {
-        'train_mode': True,
+        'train_mode': False,
         'params': {
             'max_depth': 4,
             'criterion': 'squared_error',
@@ -83,14 +83,14 @@ config = {
         }
     },
     'random_forest': {
-        'train_mode': True,
+        'train_mode': False,
         'params': {
             'n_estimators': 50,
             'max_depth': 10,
         }
     },
     'catboost': {
-        'train_mode': True,
+        'train_mode': False,
         'params': {
             'iterations': 100,
             'learning_rate': 0.075,
@@ -99,7 +99,7 @@ config = {
         }
     },
     'lightgbm': {
-        'train_mode': True,
+        'train_mode': False,
         'params': {
             'n_estimators': 100,
             'learning_rate': 0.1,
@@ -107,7 +107,7 @@ config = {
         }
     },
     'xgboost': {
-        'train_mode': True,
+        'train_mode': False,
         'params': {
             'n_estimators': 1000,
             'learning_rate': 0.1,
@@ -116,7 +116,7 @@ config = {
         }
     },
     'neural_network': {
-        'train_mode': True,
+        'train_mode': False,
         'num_epochs': 50,
         'batch_size': 32,
         'loss_fn': {
@@ -140,7 +140,7 @@ config = {
         }
     },
     'bagging': {
-        'train_mode': True,
+        'train_mode': False,
         'base_model': {
             'module': 'sklearn.tree',
             'name': 'DecisionTreeRegressor',
@@ -153,7 +153,7 @@ config = {
         }
     },
     'stacking': {
-        'train_mode': True,
+        'train_mode': False,
         'base_models': [
             {
                 'module': 'sklearn.linear_model',
@@ -200,7 +200,7 @@ config = {
         }
     },
     'stacking_l2': {
-        'train_mode': True,
+        'train_mode': False,
         'base_models': [
             {
                 'module': 'sklearn.linear_model',
