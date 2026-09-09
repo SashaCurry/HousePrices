@@ -32,11 +32,11 @@ def train_catboost(train_data):
         X=X,
         y=y,
         cv=config.training.n_splits,
-        scoring='r2',
+        scoring='neg_root_mean_squared_log_error',
         params={'cat_features': CAT_FEATURES}
     )
 
-    model_acc = round(cv_scores.mean(), 2)
+    model_acc = round(-cv_scores.mean(), 2)
     model_std = round(cv_scores.std(), 2)
 
     model = cb.CatBoostRegressor(
@@ -66,10 +66,10 @@ def train_lightgbm(train_data):
         X=X,
         y=y,
         cv=config.training.n_splits,
-        scoring='r2'
+        scoring='neg_root_mean_squared_log_error'
     )
 
-    model_acc = round(cv_scores.mean(), 2)
+    model_acc = round(-cv_scores.mean(), 2)
     model_std = round(cv_scores.std(), 2)
 
     model.fit(X, y)
@@ -95,10 +95,10 @@ def train_xgboost(train_data):
         X=X,
         y=y,
         cv=config.training.n_splits,
-        scoring='r2'
+        scoring='neg_root_mean_squared_log_error'
     )
 
-    model_acc = round(cv_scores.mean(), 2)
+    model_acc = round(-cv_scores.mean(), 2)
     model_std = round(cv_scores.std(), 2)
 
     model.fit(X, y)

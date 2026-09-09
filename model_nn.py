@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader, random_split
 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score, root_mean_squared_log_error
 
 from config import config
 from data_handle import *
@@ -127,8 +127,8 @@ def train_nn(train_data):
                 # Сохраняем предсказания, чтобы потом рассчитать R^2
                 all_preds.extend(pred.cpu().numpy())
 
-        # R^2 на валидационной выборке
-        mean_val_acc = r2_score(y_val_tensor.cpu().numpy(), all_preds)
+        # RMSLE на валидационной выборке
+        mean_val_acc = root_mean_squared_log_error(y_val_tensor.cpu().numpy(), all_preds)
 
         # Шаг планировщика
         val_loss = val_loss / len(val_loader)

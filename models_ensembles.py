@@ -21,8 +21,8 @@ def train_bagging(train_data):
                                    **config.bagging.params))
     ])
 
-    scores = cross_val_score(bagging_model, X, y, cv=config.training.n_splits)
-    model_acc = round(scores.mean(), 2)
+    scores = cross_val_score(bagging_model, X, y, cv=config.training.n_splits, scoring='neg_root_mean_squared_log_error')
+    model_acc = round(-scores.mean(), 2)
     model_std = round(scores.std(), 2)
 
     bagging_model.fit(X, y)
@@ -68,9 +68,9 @@ def train_stacking(train_data):
         cv=5
     )
 
-    scores = cross_val_score(stacking_model, X, y, cv=5)
+    scores = cross_val_score(stacking_model, X, y, cv=config.training.n_splits, scoring='neg_root_mean_squared_log_error')
 
-    model_acc = round(scores.mean(), 2)
+    model_acc = round(-scores.mean(), 2)
     model_std = round(scores.std(), 2)
 
     stacking_model.fit(X, y)
@@ -104,9 +104,9 @@ def train_stacking_l2(train_data):
         cv=5
     )
 
-    scores = cross_val_score(stacking_model, X, y, cv=5)
+    scores = cross_val_score(stacking_model, X, y, cv=config.training.n_splits, scoring='neg_root_mean_squared_log_error')
 
-    model_acc = round(scores.mean(), 2)
+    model_acc = round(-scores.mean(), 2)
     model_std = round(scores.std(), 2)
 
     stacking_model.fit(X, y)

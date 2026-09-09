@@ -1,4 +1,5 @@
-from sklearn.model_selection import KFold
+from sklearn.compose import TransformedTargetRegressor
+from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import SGDRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
@@ -14,65 +15,61 @@ def train_model_sklearn(train_data, model_name='linear_regression'):
     X = train_data_handled.drop(columns=['SalePrice'])
     y = train_data_handled['SalePrice']
 
-    model = None
+    base_pipeline = None
     if model_name == 'linear_regression':
-        model = Pipeline([
+        base_pipeline = Pipeline([
             ('scale', preprocessor),
             ('model', SGDRegressor(**config.linreg.params))
         ])
     elif model_name == 'linear_regression_l1':
-        model = Pipeline([
+        base_pipeline = Pipeline([
             ('scale', preprocessor),
             ('model', SGDRegressor(**config.linreg_l1.params))
         ])
     elif model_name == 'linear_regression_l2':
-        model = Pipeline([
+        base_pipeline = Pipeline([
             ('scale', preprocessor),
             ('model', SGDRegressor(**config.linreg_l2.params))
         ])
     elif model_name == 'linear_regression_elasticnet':
-        model = Pipeline([
+        base_pipeline = Pipeline([
             ('scale', preprocessor),
             ('model', SGDRegressor(**config.linreg_elnet.params))
         ])
     elif model_name == 'knn':
-        model = Pipeline([
+        base_pipeline = Pipeline([
             ('scale', preprocessor),
             ('model', KNeighborsRegressor(**config.knn.params))
         ])
     elif model_name == 'decision_tree':
-        model = Pipeline([
+        base_pipeline = Pipeline([
             ('scale', preprocessor),
             ('model', DecisionTreeRegressor(**config.decision_tree.params))
         ])
     elif model_name == 'random_forest':
-        model = Pipeline([
+        base_pipeline = Pipeline([
             ('scale', preprocessor),
             ('model', RandomForestRegressor(**config.random_forest.params))
         ])
 
-    kf = KFold(n_splits=config.training.n_splits, shuffle=True)
-    scores = []
+    model = TransformedTargetRegressor(
+        regressor=base_pipeline,
+        func=np.log1p,
+        inverse_func=np.expm1
+    )
 
-    for train_index, val_index in kf.split(X):
-        X_train, X_val = X.iloc[train_index], X.iloc[val_index]
-        y_train, y_val = y.iloc[train_index], y.iloc[val_index]
+    scores = cross_val_score(model, X, y, cv=config.training.n_splits, scoring='neg_root_mean_squared_log_error')
 
-        model.fit(X_train, y_train)
+    model_acc = round(-scores.mean(), 2)
+    model_std = round(scores.std(), 2)
 
-        cur_accuracy = model.score(X_val, y_val)
-        scores.append(cur_accuracy)
+    base_pipeline.fit(X, y)
 
-    model_acc = round(sum(scores) / len(scores), 2)
-    model_std = round(np.array(scores).std(), 2)
-
-    model.fit(X, y)
-    return model, model_acc, model_std
+    return base_pipeline, model_acc, model_std
 
 
 def test_model_sklearn(data, model, model_name):
     X_test = handling_for_linear(data)
-    # print(X_test[X_test.isnull().any(axis=0)])
 
     preds = model.predict(X_test)
 
