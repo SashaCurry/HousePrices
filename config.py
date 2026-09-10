@@ -22,14 +22,14 @@ config = {
         'linreg_en': 0.18,
         'knn': 0.17,
         'dt': 0.23,
-        'rf': 0,
-        'catboost': 0,
-        'lightgbm': 0,
-        'xgboost': 0,
-        'nn': 0,
-        'bagging': 0,
-        'stacking': 0,
-        'stacking_l2': 0
+        'rf': 0.15,
+        'catboost': 0.14,
+        'lightgbm': 0.14,
+        'xgboost': 0.13,
+        'nn': 0.15,
+        'bagging': 0.15,
+        'stacking': 0.13,
+        'stacking_l2': 0.13
     },
     'linreg': {
         'train_mode': True,
