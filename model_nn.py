@@ -128,7 +128,8 @@ def train_nn(train_data):
                 all_preds.extend(pred.cpu().numpy())
 
         # RMSLE на валидационной выборке
-        mean_val_acc = root_mean_squared_log_error(y_val_tensor.cpu().numpy(), all_preds)
+        all_preds = y_scaler.inverse_transform(all_preds)
+        mean_val_acc = root_mean_squared_log_error(y_val, all_preds)
 
         # Шаг планировщика
         val_loss = val_loss / len(val_loader)
@@ -137,7 +138,6 @@ def train_nn(train_data):
     return model, preprocessor, y_scaler, round(mean_val_acc, 2)
 
 
-## TODO: при реализации тестирование не забыть отмасштабировать таргет обратно
 def test_nn(test_data, model_state, preprocessor, y_scaler):
     X_test = handling_for_linear(test_data)
 

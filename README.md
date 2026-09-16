@@ -1,4 +1,4 @@
-# Финальный проект — Titanic
+# Финальный проект — House Prices
 Link: https://www.kaggle.com/competitions/house-prices-advanced-regression-techniques/overview
 
 ## Структура проекта:
@@ -6,8 +6,8 @@ Link: https://www.kaggle.com/competitions/house-prices-advanced-regression-techn
 - `content/` содержит все файлы, которые используются для работы;
 у меня здесь были папки для данных, предсказаний и моделей, но всё
 это настраивается индивидуально в конфигурационном файле;
-- `1_EDA_Titanic.ipynb` — ноутбук с анализом данных;
-- `2_Feature-Engineering.ipynb` — подробный разбор фича-инженеринга и обработки данных;
+- `1_EDA.ipynb` — ноутбук с анализом данных;
+- `2_Feature-engineering.ipynb` — подробный разбор фича-инженеринга и обработки данных;
 - `config.py` — конфигурационный файл, из которого осуществляется настройка моделей и программы;
 здесь находятся все пути к файлам, скоры с лидерборда Каггл и гиперпараметры к каждой модели;
 - `data_handle.py` — каждая модель перед работой осуществляет предобработку данных с помощью метода, находящего здесь;
@@ -32,7 +32,7 @@ Link: https://www.kaggle.com/competitions/house-prices-advanced-regression-techn
 - Дерево решений — `dt_model.joblib`;
 - Случайный лес — `rf_model.joblib`;
 - CatBoost — `catboost_model.cbm`;
-- LightGBM — `lightgbm.model.txt`;
+- LightGBM — `lightgbm_model.pkl`;
 - XGBoost — `xgboost_model.json`;
 - NeuralNetwork — `nn_model.pt`;
 - Bagging — `bagging_model.joblib`;
@@ -43,7 +43,7 @@ Link: https://www.kaggle.com/competitions/house-prices-advanced-regression-techn
 
 Перед запуском необходимо скачать тренировочные и тестовые датасеты, положить в любую папку и указать данную папку в *config.py*.
 
-Также обязательно доустанавливать все необходимые библиотеки. Библиотека PyTorch по-разному устанавливается, если устанавливать её через $pip$ или $conda$. Поэтому для них предоставлены разные файлы:
+Также обязательно доустанавливать все необходимые библиотеки. Библиотека PyTorch по-разному устанавливается, если устанавливать её через *pip* или *conda*. Поэтому для них предоставлены разные файлы:
 - pip: `pip3 install -r requirements_pip.txt`
 - conda: `conda install --file requirements_conda.txt`
 
@@ -53,21 +53,21 @@ Link: https://www.kaggle.com/competitions/house-prices-advanced-regression-techn
 
 ## Таблица результатов
 
-| Approach                    | CV     | CV STD | LB    | Date     |
-|-----------------------------| ------ | ------ |-------| -------- |
-| LinReg                      | 0.15   | 0.01   | 0.21  | 18.08.26 |
-| LinReg-L1                   | 0.15   | 0.01   | 0.22  | 18.08.26 |
-| LinReg-L2                   | 0.15   | 0.01   | 0.22  | 18.08.26 |
-| LinReg-ElNet                | 0.15   | 0.01   | 0.18  | 18.08.26 |
-| KNN                         | 0.17   | 0.01   | 0.17  | 18.08.26 |
-| DecisionTree                | 0.21   | 0.01   | 0.23  | 18.08.26 |
-| RandomForest                | 0.14   | 0.01   | 0.15  | 18.08.26 |
-| CatBoost                    | 0.14   | 0.01   | 0.14  | 27.08.26 |
-| LightGBM                    | 0.13   | 0.01   | 0.14  | 27.08.26 |
-| XGBoost                     | 0.13   | 0.01   | 0.13  | 27.08.26 |
-| NN                          | 0.03   | -      | 0.15  | 28.08.26 |
-| Bagging                     | 0.14   | 0.01   | 0.15  | 28.08.26 |
-| Stacking via LinReg         | 0.13   | 0.01   | 0.13  | 31.08.26 |
-| Stacking via LinReg-l2      | 0.13   | 0.01   | 0.13  | 31.08.26 |
+| Approach                    | CV   | CV STD | LB    | Date |
+|-----------------------------|------| ------ |-------| --- |
+| LinReg                      | 0.15 | 0.01   | 0.21  | 18.08.26 |
+| LinReg-L1                   | 0.15 | 0.01   | 0.22  | 18.08.26 |
+| LinReg-L2                   | 0.15 | 0.01   | 0.22  | 18.08.26 |
+| LinReg-ElNet                | 0.15 | 0.01   | 0.18  | 18.08.26 |
+| KNN                         | 0.17 | 0.01   | 0.17  | 18.08.26 |
+| DecisionTree                | 0.21 | 0.01   | 0.23  | 18.08.26 |
+| RandomForest                | 0.14 | 0.01   | 0.15  | 18.08.26 |
+| CatBoost                    | 0.14 | 0.01   | 0.14  | 27.08.26 |
+| LightGBM                    | 0.13 | 0.01   | 0.14  | 27.08.26 |
+| XGBoost                     | 0.13 | 0.01   | 0.13  | 27.08.26 |
+| NN                          | 0.14 | -      | 0.15  | 15.09.26 |
+| Bagging                     | 0.14 | 0.01   | 0.15  | 28.08.26 |
+| Stacking via LinReg         | 0.13 | 0.01   | 0.13  | 31.08.26 |
+| Stacking via LinReg-l2      | 0.13 | 0.01   | 0.13  | 31.08.26 |
 
  Данные метрики были получены на гиперпараметрах, указанных в конфигурационном файле.
